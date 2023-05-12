@@ -90,8 +90,7 @@ class NestNet(nn.Module):
       if scale_hidden_dims and i != 0:
         # Overwrite the original num_heads value in encoder_dict so num_heads
         # multipled by scale_hidden_dims continueously.
-        encoder_dict.update(
-            {"num_heads": encoder_dict["num_heads"] * scale_hidden_dims})
+        encoder_dict["num_heads"] = encoder_dict["num_heads"] * scale_hidden_dims
       for _ in range(num_layers_per_block[i]):
         x = self_attention.EncoderNDBlock(
             **encoder_dict, path_drop=path_drop[block_idx])(
@@ -99,11 +98,7 @@ class NestNet(nn.Module):
         block_idx = block_idx + 1
       if i < num_blocks - 1:
         grid_size = int(math.sqrt(x.shape[1]))
-        if scale_hidden_dims:
-          output_dim = x.shape[-1] * scale_hidden_dims
-        else:
-          output_dim = None
-
+        output_dim = x.shape[-1] * scale_hidden_dims if scale_hidden_dims else None
         x = self_attention.ConvPool(
             grid_size=(grid_size, grid_size),
             patch_size=(config.patch_size, config.patch_size),
@@ -116,8 +111,7 @@ class NestNet(nn.Module):
 
     x = norm_fn()(x)
     x_pool = jnp.mean(x, axis=(1, 2))
-    out = dense_fn(self.num_classes)(x_pool)
-    return out
+    return dense_fn(self.num_classes)(x_pool)
 
 
 MODELS = {}

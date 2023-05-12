@@ -52,8 +52,7 @@ TRANSLATE_CONST = None
 def _randomly_negate_tensor(tensor):
   """With 50% prob turn the tensor negative."""
   should_flip = tf.cast(tf.floor(tf.random.uniform([]) + 0.5), tf.bool)
-  final_tensor = tf.cond(should_flip, lambda: tensor, lambda: -tensor)
-  return final_tensor
+  return tf.cond(should_flip, lambda: tensor, lambda: -tensor)
 
 
 def _rotate_level_to_arg(level):
@@ -198,10 +197,9 @@ class RandAugment(object):
 
     if self.num_levels is None:
       return tf.random.uniform(shape=[], dtype=tf.float32)
-    else:
-      level = tf.random.stateless_uniform(
-          shape=[], seed=rng, maxval=self.num_levels + 1, dtype=tf.int32)
-      return tf.cast(level, tf.float32) / self.num_levels
+    level = tf.random.stateless_uniform(
+        shape=[], seed=rng, maxval=self.num_levels + 1, dtype=tf.int32)
+    return tf.cast(level, tf.float32) / self.num_levels
 
   def _apply_one_layer(self, rng, image):
     """Applies one level of augmentation to the image."""

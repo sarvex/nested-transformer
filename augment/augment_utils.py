@@ -29,7 +29,7 @@ def _get_augmenter_type_and_args(**kwargs):
   augment_type = kwargs['type'].lower()
   augment_args = {}
   for k, v in kwargs.items():
-    if k.startswith(augment_type + '_'):
+    if k.startswith(f'{augment_type}_'):
       augment_args[k[len(augment_type) + 1:]] = v
     if k == 'size':
       augment_args[k] = v

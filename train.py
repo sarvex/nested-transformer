@@ -93,9 +93,9 @@ def create_train_state(config: ml_collections.ConfigDict, rng: np.ndarray,
       # Allow zero weight decay for certain parameters listed in optim_wd_ignore
       igns = config.optim_wd_ignore
       p = flax.optim.ModelParamTraversal(
-          lambda path, _: not any([i in path for i in igns]))
+          lambda path, _: all(i not in path for i in igns))
       p_nowd = flax.optim.ModelParamTraversal(
-          lambda path, _: any([i in path for i in igns]))
+          lambda path, _: any(i in path for i in igns))
       p_opt = flax.optim.Adam(weight_decay=config.weight_decay)
       p_nowd_opt = flax.optim.Adam(weight_decay=0)
       optimizer = flax.optim.MultiOptimizer((p, p_opt),
@@ -176,8 +176,7 @@ def train_step(
         losses.softmax_cross_entropy_loss(logits=logits, labels=batch["label"]))
     if weight_decay > 0:
       weight_penalty_params = jax.tree_leaves(variables["params"])
-      weight_l2 = sum(
-          [jnp.sum(x**2) for x in weight_penalty_params if x.ndim > 1])
+      weight_l2 = sum(jnp.sum(x**2) for x in weight_penalty_params if x.ndim > 1)
       weight_penalty = weight_decay * 0.5 * weight_l2
       loss = loss + weight_penalty
     new_model_state = dict(new_model_state)
@@ -191,7 +190,7 @@ def train_step(
 
   # Compute l2 grad always for training debugging.
   grads, _ = jax.tree_flatten(grad)
-  l2_g = jnp.sqrt(sum([jnp.vdot(p, p) for p in grads]))
+  l2_g = jnp.sqrt(sum(jnp.vdot(p, p) for p in grads))
   if grad_clip_max_norm:
     g_factor = jnp.minimum(1.0, grad_clip_max_norm / (l2_g + 1e-6))
     grad = jax.tree_map(lambda p: g_factor * p, grad)
@@ -233,7 +232,7 @@ def eval_step(model: Any, state: TrainState,
   variables = {
       "params": state.optimizer.target,
   }
-  variables.update(state.model_state)
+  variables |= state.model_state
   logits = model(train=False).apply(variables, batch["image"], mutable=False)
   loss = jnp.mean(
       losses.cross_entropy_loss(logits=logits, labels=batch["label"]))

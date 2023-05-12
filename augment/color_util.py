@@ -42,7 +42,7 @@ def random_brightness(image, max_delta, impl='simclrv2'):
   elif impl == 'simclrv1':
     image = tf.image.random_brightness(image, max_delta=max_delta)
   else:
-    raise ValueError('Unknown impl {} for random brightness.'.format(impl))
+    raise ValueError(f'Unknown impl {impl} for random brightness.')
   return image
 
 
@@ -153,17 +153,17 @@ def color_jitter_rand(image,
           return x
         else:
           return tf.image.random_contrast(x, lower=1-contrast, upper=1+contrast)
+
       def saturation_foo():
         if saturation == 0:
           return x
         else:
           return tf.image.random_saturation(
               x, lower=1-saturation, upper=1+saturation)
+
       def hue_foo():
-        if hue == 0:
-          return x
-        else:
-          return tf.image.random_hue(x, max_delta=hue)
+        return x if hue == 0 else tf.image.random_hue(x, max_delta=hue)
+
       x = tf.cond(tf.less(i, 2),
                   lambda: tf.cond(tf.less(i, 1), brightness_foo, contrast_foo),
                   lambda: tf.cond(tf.less(i, 3), saturation_foo, hue_foo))

@@ -124,10 +124,9 @@ def train_cifar_preprocess(features: Dict[str, tf.Tensor]):
 def _check_valid_mean_std(mean, std):
   expected_shape = (1, 1, 3)
   message = "%s shape invalid."
-  assert all([a == b for a, b in zip(expected_shape, mean.shape)
-             ]), message % "mean"
-  assert all([a == b for a, b in zip(expected_shape, std.shape)
-             ]), message % "std"
+  assert all(a == b
+             for a, b in zip(expected_shape, mean.shape)), (message % "mean")
+  assert all(a == b for a, b in zip(expected_shape, std.shape)), message % "std"
 
 
 def get_augment_preprocess(

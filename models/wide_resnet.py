@@ -168,10 +168,7 @@ class WideResnetBlock(nn.Module):
     """
     if self.activate_before_residual:
       x = activation(x, train, name='init_bn')
-      orig_x = x
-    else:
-      orig_x = x
-
+    orig_x = x
     block_x = x
     if not self.activate_before_residual:
       block_x = activation(block_x, train, name='init_bn')

@@ -102,13 +102,12 @@ class DropPath(nn.Module):
   def __call__(self, inputs):
     if self.rate == 0.:
       return inputs
-    keep_prob = 1. - self.rate
     if self.deterministic:
       return inputs
-    else:
-      # just use the same set of naming with dropout
-      rng = self.make_rng("dropout")
-      mask_shape = [inputs.shape[0]] + [1 for _ in inputs.shape[1:]]
-      mask = jax.random.bernoulli(rng, p=keep_prob, shape=mask_shape)
-      mask = jnp.tile(mask, [1] + list(inputs.shape[1:]))
-      return jax.lax.select(mask, inputs / keep_prob, jnp.zeros_like(inputs))
+    # just use the same set of naming with dropout
+    rng = self.make_rng("dropout")
+    mask_shape = [inputs.shape[0]] + [1 for _ in inputs.shape[1:]]
+    keep_prob = 1. - self.rate
+    mask = jax.random.bernoulli(rng, p=keep_prob, shape=mask_shape)
+    mask = jnp.tile(mask, [1] + list(inputs.shape[1:]))
+    return jax.lax.select(mask, inputs / keep_prob, jnp.zeros_like(inputs))

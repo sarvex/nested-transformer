@@ -38,10 +38,7 @@ class MultiHeadAttention(nn.Module):
 
   @nn.compact
   def __call__(self, x):  # x is blocked with shape (b,..., N, C)
-    if self.hidden_dims is None:
-      hidden_dims = x.shape[-1]
-    else:
-      hidden_dims = self.hidden_dims
+    hidden_dims = x.shape[-1] if self.hidden_dims is None else self.hidden_dims
     assert hidden_dims % self.num_heads == 0
     head_dim = hidden_dims // self.num_heads
     query = nn.DenseGeneral(
@@ -94,10 +91,7 @@ class MultiQueryAttention(nn.Module):
 
   @nn.compact
   def __call__(self, x):
-    if self.hidden_dims is None:
-      hidden_dims = x.shape[-1]
-    else:
-      hidden_dims = self.hidden_dims
+    hidden_dims = x.shape[-1] if self.hidden_dims is None else self.hidden_dims
     assert hidden_dims % self.num_heads == 0
     head_dim = hidden_dims // self.num_heads
     query = nn.DenseGeneral(
@@ -181,10 +175,7 @@ class EncoderNDBlock(nn.Module):
 
   @nn.compact
   def __call__(self, x):
-    if self.hidden_dims is not None:
-      hidden_dims = self.hidden_dims
-    else:
-      hidden_dims = x.shape[-1]
+    hidden_dims = self.hidden_dims if self.hidden_dims is not None else x.shape[-1]
     identity = x
     attn_kwargs = dict(
         hidden_dims=hidden_dims,
@@ -255,12 +246,9 @@ class PatchEmbedding(nn.Module):
   def __call__(self, inputs):
     assert inputs.shape[1] % self.patch_size[0] == 0
     assert inputs.shape[2] % self.patch_size[1] == 0
-    out = self.conv_fn(
-        self.embedding_dim,
-        kernel_size=self.patch_size,
-        strides=self.patch_size)(
-            inputs)
-    return out
+    return self.conv_fn(self.embedding_dim,
+                        kernel_size=self.patch_size,
+                        strides=self.patch_size)(inputs)
 
 
 class ConvPool(nn.Module):
@@ -275,10 +263,7 @@ class ConvPool(nn.Module):
   def __call__(self, x):
     x = attn_utils.unblock_images(
         x, grid_size=self.grid_size, patch_size=self.patch_size)
-    if self.output_dim is None:
-      output_dim = x.shape[-1]
-    else:
-      output_dim = self.output_dim
+    output_dim = x.shape[-1] if self.output_dim is None else self.output_dim
     x = self.conv_fn(output_dim, kernel_size=(3, 3))(x)
     x = nn.LayerNorm(dtype=self.dtype, epsilon=1e-6)(x)
     x = nn.max_pool(x, window_shape=(3, 3), strides=(2, 2), padding="SAME")

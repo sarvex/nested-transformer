@@ -95,9 +95,7 @@ def _sample_batch_mask(rng, height, width, mask_height, mask_width):
       lambda t: tf.roll(t[0], t[1], axis=[0]), (y, y_shift),
       dtype=y.dtype,
       back_prop=False)
-  # [batch_size, height, width]
-  mask = tf.math.logical_and(y[:, :, tf.newaxis], x[:, tf.newaxis, :])
-  return mask
+  return tf.math.logical_and(y[:, :, tf.newaxis], x[:, tf.newaxis, :])
 
 
 def batch_cutmix(rng, images, label_probs, beta=1.0, smoothing=0.):
@@ -209,9 +207,7 @@ def _rand_bbox_mask(rng, h, w, target_area, aspect_ratio=1.0):
                                                       w_mid + w_size_half))
   w_mask = tf.cast(w_mask, tf.float32)
 
-  mask = tf.einsum('H,W->HW', h_mask, w_mask)
-
-  return mask
+  return tf.einsum('H,W->HW', h_mask, w_mask)
 
 
 def random_erasing(rng,
@@ -319,8 +315,7 @@ def wrap(image):
   """Returns 'image' with an extra channel set to all 1s."""
   shape = tf.shape(image)
   extended_channel = tf.ones([shape[0], shape[1], 1], image.dtype)
-  extended = tf.concat([image, extended_channel], 2)
-  return extended
+  return tf.concat([image, extended_channel], 2)
 
 
 def unwrap(image):

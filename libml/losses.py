@@ -109,8 +109,8 @@ def weighted_unnormalized_softmax_cross_entropy(logits,
   """
   if logits.ndim != one_hot_targets.ndim:
     raise ValueError(
-        "Incorrect shapes. Got shape %s logits and %s one_hot_targets" %
-        (str(logits.shape), str(one_hot_targets.shape)))
+        f"Incorrect shapes. Got shape {str(logits.shape)} logits and {str(one_hot_targets.shape)} one_hot_targets"
+    )
 
   # optionally apply label smoothing
   if label_smoothing is not None:

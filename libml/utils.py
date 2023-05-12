@@ -155,7 +155,7 @@ def load_and_custom_init_checkpoint(init_state: Any,
   """Load checkpoint for finetuing task, e.g. 384 ImageNet classification."""
 
   def _find_var_names(s):
-    return [i for i in s.keys()]
+    return list(s.keys())
 
   logging.info("Load finetune checkpoint from %s", checkpoint_path)
   # 1) Copy model params init_param_dict.
